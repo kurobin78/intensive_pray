@@ -2,18 +2,25 @@ import json
 import numpy as np
 from sentence_transformers import SentenceTransformer
 
+# 1. 모델 로드
 model = SentenceTransformer('snunlp/KR-SBERT-V40K-klueNLI-augSTS')
 
-# 1. 성경 데이터 로드
-with open('korean.json', 'r', encoding='utf-8') as f:
-    bible_data = json.load(f)
+# 2. JSON 데이터 로드
+with open('bible_ko.json', 'r', encoding='utf-8') as f:
+    data = json.load(f)
 
-contents = [item['content'] for item in bible_data]
+# 데이터 구조에 맞게 'verses' 키에서 꺼내오기
+bible_verses = data['verses']
 
-# 2. 전체 구절 임베딩 (시간이 몇 분 소요될 수 있음)
-print("임베딩 시작...")
-bible_embeddings = model.encode(contents, show_progress_bar=True)
+# 'text' 키를 사용하여 본문 리스트 만들기
+contents = [item['text'] for item in bible_verses]
 
-# 3. 결과 저장 (Numpy 배열로 저장)
-np.save('bible_embeddings.npy', bible_embeddings)
-print("저장 완료: bible_embeddings.npy")
+print(f"총 {len(contents)}개의 구절을 분석합니다.")
+
+# 3. 임베딩 생성 (약 5~10분 소요될 수 있음)
+print("임베딩 시작... 잠시만 기다려 주세요.")
+embeddings = model.encode(contents, show_progress_bar=True)
+
+# 4. 결과 저장
+np.save('bible_embeddings.npy', embeddings)
+print("성공! 'bible_embeddings.npy' 파일이 생성되었습니다.")
