@@ -1,4 +1,4 @@
-mport streamlit as st
+import streamlit as st
 import numpy as np
 import json
 from sentence_transformers import SentenceTransformer, util
@@ -106,3 +106,4 @@ if st.session_state.found_verse:
                 st.success("메일이 성공적으로 발송되었습니다!")
         else:
             st.error("이메일 주소를 입력해 주세요.")
+
