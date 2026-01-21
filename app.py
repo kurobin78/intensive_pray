@@ -2,6 +2,30 @@ import streamlit as st
 from sentence_transformers import SentenceTransformer, util
 import torch
 
+mport streamlit as st
+import numpy as np
+import json
+from sentence_transformers import SentenceTransformer, util
+import torch
+
+@st.cache_resource
+def load_all_bible():
+    # 모델 로드
+    model = SentenceTransformer('snunlp/KR-SBERT-V40K-klueNLI-augSTS')
+    
+    # 성경 텍스트 로드
+    with open('korean.json', 'r', encoding='utf-8') as f:
+        bible_data = json.load(f)
+        
+    # 미리 계산된 임베딩 로드
+    embeddings = np.load('bible_embeddings.npy')
+    # 계산을 위해 다시 PyTorch 텐서로 변환
+    embeddings_tensor = torch.from_numpy(embeddings)
+    
+    return model, bible_data, embeddings_tensor
+
+model, bible_data, bible_embeddings = load_all_bible()
+
 # --- 1. 페이지 스타일 및 설정 ---
 st.set_page_config(page_title="말씀의 등불", page_icon="✨", layout="centered")
 
@@ -67,4 +91,5 @@ with st.container():
             st.warning("기도제목을 먼저 입력해 주세요.")
 
 # --- 4. 하단 안내 ---
+
 st.caption("© 2026 말씀의 등불 - 오픈소스 AI 모델을 사용하여 위로를 전합니다.")
