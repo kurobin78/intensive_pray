@@ -2,7 +2,7 @@ import streamlit as st
 from sentence_transformers import SentenceTransformer, util
 import torch
 
-mport streamlit as st
+import streamlit as st
 import numpy as np
 import json
 from sentence_transformers import SentenceTransformer, util
@@ -93,3 +93,4 @@ with st.container():
 # --- 4. 하단 안내 ---
 
 st.caption("© 2026 말씀의 등불 - 오픈소스 AI 모델을 사용하여 위로를 전합니다.")
+
