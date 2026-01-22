@@ -1,3 +1,2 @@
 streamlit
-sentence-transformers
-torch
+google-generativeai
