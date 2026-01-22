@@ -7,7 +7,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-# --- 1. 이메일 발송 함수 ---
+# --- 1. 이메일 발송 함수 (기존과 동일) ---
 def send_email(receiver_email, prayer, verse_title, verse_content):
     try:
         sender_email = st.secrets["GMAIL_USER"]
@@ -35,16 +35,15 @@ def send_email(receiver_email, prayer, verse_title, verse_content):
         st.error(f"메일 발송 실패: {e}")
         return False
 
-# --- 2. 모델 및 5개로 쪼개진 데이터 로드 ---
+# --- 2. 모델 및 5개 분할 데이터 로드 ---
 @st.cache_resource
 def load_resources():
     model = SentenceTransformer('snunlp/KR-SBERT-V40K-klueNLI-augSTS')
-    
     with open('bible_ko.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
     bible_verses = data['verses']
     
-    # 5개의 조각을 순서대로 로드하여 합치기
+    # 5개의 조각 로드
     parts = []
     for i in range(1, 6):
         parts.append(np.load(f'embeddings_part{i}.npy'))
@@ -54,8 +53,9 @@ def load_resources():
 
 model, bible_verses, bible_embeddings = load_resources()
 
-# --- 3. UI 및 검색 로직 ---
-st.title("🙏 말씀의 등불 (Email Edition)")
+# --- 3. UI 구성 ---
+st.title("🙏 말씀의 등불")
+st.write("기도제목을 적어주시면 가장 가까운 말씀을 찾아드립니다.")
 
 if 'verse_result' not in st.session_state:
     st.session_state.verse_result = None
@@ -64,7 +64,7 @@ prayer_input = st.text_area("기도제목을 입력하세요", height=150)
 
 if st.button("말씀 찾기"):
     if prayer_input.strip():
-        with st.spinner('말씀을 찾는 중...'):
+        with st.spinner('말씀을 묵상하며 찾는 중...'):
             q_emb = model.encode(prayer_input, convert_to_tensor=True)
             scores = util.pytorch_cos_sim(q_emb, bible_embeddings)[0]
             best_idx = torch.argmax(scores).item()
@@ -78,14 +78,24 @@ if st.button("말씀 찾기"):
     else:
         st.warning("내용을 입력해주세요.")
 
-# 결과 출력 및 이메일 전송
+# --- 4. 결과 출력 (풍선 효과 삭제됨) ---
 if st.session_state.verse_result:
     v = st.session_state.verse_result
-    st.success(f"### {v['title']}\n{v['content']}")
+    st.divider()
+    
+    # 풍선 효과(st.balloons)를 삭제하고 깔끔한 결과창만 남겼습니다.
+    st.success(f"### {v['title']}")
+    st.info(f"**{v['content']}**")
     
     st.divider()
-    email_target = st.text_input("이 말씀을 받을 이메일 주소")
+    
+    # 이메일 전송 UI
+    st.subheader("📬 이 말씀을 이메일로 받기")
+    email_target = st.text_input("이메일 주소 입력")
     if st.button("이메일로 보내기"):
         if email_target:
-            if send_email(email_target, v['prayer'], v['title'], v['content']):
-                st.success("메일 발송 성공!")
+            with st.spinner('보내는 중...'):
+                if send_email(email_target, v['prayer'], v['title'], v['content']):
+                    st.success("메일이 발송되었습니다!")
+        else:
+            st.error("주소를 입력해 주세요.")
