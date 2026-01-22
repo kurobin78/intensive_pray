@@ -18,7 +18,7 @@ try:
     # 계정 A에서 발급받은 API 키 사용
     gemini_key = st.secrets["ACCOUNTS"]["GEMINI_API_KEY"]
     genai.configure(api_key=gemini_key)
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    model = genai.GenerativeModel(''gemini-2.5-flash')
 except Exception as e:
     st.error("Gemini API 설정을 확인해주세요.")
     st.stop()
@@ -81,3 +81,4 @@ if st.session_state.final_content:
                     st.success(f"{target_email}로 발송이 완료되었습니다!")
         else:
             st.warning("이메일 주소를 적어주세요.")
+
